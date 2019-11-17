@@ -25,7 +25,9 @@
 #include "definitions.h"
 #include "csound.h"
 #include "memory.h"
-//#include "sndfile.h"
+#ifdef LIBSNDFILE
+    #include "sndfile.h"
+#endif
 #include "soundio.h"
 #include "util.h"
 

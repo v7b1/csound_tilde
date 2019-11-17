@@ -1,12 +1,12 @@
 {
-	"author" : "vboehm",
+	"author" : "ingalls, pyon, yi, boehm",
 	"description" : "csound~: csound for maxmsp",
-	"homepatcher" : "csound~.maxpat",
+	"homepatcher" : "csound~.maxhelp",
 	"max_version_min" : "7.1",
 	"name" : "csound_tilde",
 	"os" : {
 		"macintosh" : {
-			"platform" : [ "ia32", "x64" ],
+			"platform" : [ "x64" ],
 			"min_version" : "none"
 		},
 		"windows" : {
@@ -15,10 +15,9 @@
 		}
 	},
 	"package_extra" : {
-		"reverse_domain" : "com.cycling74",
-		"copyright" : "Copyright (c) 2016 Cycling '74"
+		"reverse_domain" : "com.csound",
 	},
 	"tags" : [ ],
 	"version" : "@GIT_VERSION_MAJ@.@GIT_VERSION_MIN@.@GIT_VERSION_SUB@",
-	"website" : "http://www.csound.com"
+	"website" : "https://csound.com"
 }

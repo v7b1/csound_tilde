@@ -27,8 +27,6 @@
 #include "CsoundTable.h"
 //#include "buffer.h"	// Leave this out of CsoundTable.h; it causes conflicts with boost/max header combo.
 
-//#include "c74_msp.h"
-
 #include <iostream>
 
 using namespace dvx;
@@ -69,37 +67,14 @@ int CsoundTable::LoadAudioFile(char *filename, int num, int channel, int resize,
 {
     //printf("no 'LoadAudioFile' method available, sorry!\n\n");
     
-    // vb, try out some things here...
     char eventStr[MAX_EVENT_MESSAGE_SIZE];
     int result=0;
     
-    // vb:
-    // as we have no way of checking the length, numChannnels and sr of the soundfile
-    // we ignore sizeTime for now and don't bother with checking numChannels
-    // if table doesn't exist: always try to read complete soundfile (starting from offsetTime) into table
-    // else: try to read complete soundfile (starting from offsetTime) up to table length
-    
-    if(!GetTable(num)) {
-        std::cout << "table doesn't exists!\n";
-        snprintf(eventStr, MAX_EVENT_MESSAGE_SIZE-1, "f %d 0 0 1 \"%s\" %f 0 %d", num, filename, offsetTime, channel);
-        csoundInputMessage(m_csound, eventStr);
-        csoundPerformKsmps(m_csound); // Process one k-cycle to force table replacement now.
-    }
-    else {
-        //snprintf(eventStr, MAX_EVENT_MESSAGE_SIZE-1, "filelen \"%s\" ", filename);
-        //csoundInputMessage(m_csound, eventStr);
-
-        snprintf(eventStr, MAX_EVENT_MESSAGE_SIZE-1, "f %d 0 %d 1 \"%s\" %f 0 %d", num, m_samples, filename, offsetTime, channel);
-        csoundInputMessage(m_csound, eventStr);
-        csoundPerformKsmps(m_csound);
-    }
-    result=0;
-    /*
-    char eventStr[MAX_EVENT_MESSAGE_SIZE];
+#ifdef LIBSNDFILE
     SF_INFO sf;
     SNDFILE *sf_ptr = NULL;
     int offsetFrames, sizeFrames, sizeSamples;
-    int i, tmp, framesToRead, framesRead=0, result=0;
+    int i, tmp, framesToRead, framesRead=0;
     
     if(!GetTable(num))
     {   // num doesn't exist.
@@ -227,14 +202,36 @@ int CsoundTable::LoadAudioFile(char *filename, int num, int channel, int resize,
         }
     }
     sf_close(sf_ptr);
-     */
+    
+    
+#else
+    // vb:
+    // without libsndfile we have no way of checking the length, numChannnels and sr of the soundfile
+    // we ignore sizeTime for now and don't bother with checking numChannels
+    // if table doesn't exist: always try to read complete soundfile (starting from offsetTime) into table
+    // else: try to read complete soundfile (starting from offsetTime) up to table length
+    
+    if(!GetTable(num)) {
+        std::cout << "table doesn't exists!\n";
+        snprintf(eventStr, MAX_EVENT_MESSAGE_SIZE-1, "f %d 0 0 1 \"%s\" %f 0 %d", num, filename, offsetTime, channel);
+        csoundInputMessage(m_csound, eventStr);
+        csoundPerformKsmps(m_csound); // Process one k-cycle to force table replacement now.
+    }
+    else {
+        snprintf(eventStr, MAX_EVENT_MESSAGE_SIZE-1, "f %d 0 %d 1 \"%s\" %f 0 %d", num, m_samples, filename, offsetTime, channel);
+        csoundInputMessage(m_csound, eventStr);
+        csoundPerformKsmps(m_csound);
+    }
+
+#endif
+    
     return result;
 }
 
+// vb-- the old buffer api based on t_buffer etc. is deprecated
 /*
 int CsoundTable::WriteBufferTilde(t_symbol *bufferSymbol, int num, int targetChannel, float offsetTime, float sizeTime)
 {
-    // vb: the whole 't_buffer' stuff is deprecated and should be replaced sooner or later...
 	int i, tmp, offsetFrames, offsetSamples, sizeFrames;
 	float *buffer = NULL;
 	t_buffer *b = NULL;   // Pointer to a MSP buffer~ obje
@@ -335,7 +332,6 @@ int CsoundTable::WriteBufferTilde(t_symbol *bufferSymbol, int num, int targetCha
 
 int CsoundTable::WriteBufferTildeNew(t_buffer_ref *bufref, int num, int targetChannel, float offsetTime, float sizeTime)
 {
-    // vb: the whole 't_buffer' stuff is deprecated and should be replaced sooner or later...
     int i, tmp, offsetFrames, offsetSamples, sizeFrames;
     float *buffer = NULL;
     long frames, nchls;
@@ -449,7 +445,7 @@ int CsoundTable::ReadBufferTildeNew(t_buffer_ref *bufref, int num, int sourceCha
     nchnls = buffer_getchannelcount(b);
     b_sr = buffer_getsamplerate(b);
     
-    //TODO: need to retrieve the original buffer name (for the error messages)
+    //TODO: need to retrieve the original buffer name (for the error messages)?
 
 
     // Get a pointer to the Csound table corresponding to num.
