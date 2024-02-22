@@ -49,7 +49,6 @@ int MaxChannelStringLength = 64; // Should init to something (probable limit is 
 
 using namespace dvx;
 
-//int T_EXPORT main(void)
 void ext_main(void* r)
 {
 	t_class *c;
@@ -330,7 +329,7 @@ void csound_dsp64(t_csound *x, t_object *dsp64, short *count, double samplerate,
 void csound_int(t_csound *x, long n)
 {
 	if(x->bypass || !x->cso->m_compiled || x->cso->m_performanceFinished) return;
-	x->cso->m_midiBuffer.Enqueue((byte) n);
+	x->cso->m_midiBuffer.Enqueue((BBYTE) n);
 }
 
 void csound_float(t_csound *x, double f){}
@@ -396,7 +395,7 @@ void csound_control(t_csound *x, t_symbol *s, short argc, t_atom *argv)
 void csound_midi(t_csound *x, t_symbol *s, short argc, t_atom *argv)
 {
 	int i;
-	byte buffer[MAX_MIDI_MESSAGE_SIZE];
+    BBYTE buffer[MAX_MIDI_MESSAGE_SIZE];
 	
 	if(x->bypass || sys_getdspstate()) return;
 	if(argc == 0 || argc > MAX_MIDI_MESSAGE_SIZE) return;
@@ -405,7 +404,7 @@ void csound_midi(t_csound *x, t_symbol *s, short argc, t_atom *argv)
 		switch(argv[i].a_type)
 		{
 		case A_LONG:
-			buffer[i] = (byte) atom_getlong(&argv[i]);
+			buffer[i] = (BBYTE) atom_getlong(&argv[i]);
 			break;
 		default: 
 			object_error(x->m_obj, "Only integers are allowed in midi messages.");
@@ -554,7 +553,7 @@ void *csound_new(t_symbol *s, short argc, t_atom *argv)
 		x->outputOverdrive = false;
 
 		x->cso = new CsoundObject(x);                // Must construct CsoundObject before following code!
-		std::auto_ptr<CsoundObject> auto_p(x->cso);  // Just in case exception happens before end of try.
+		std::unique_ptr<CsoundObject> auto_p(x->cso);  // Just in case exception happens before end of try.
 
 		x->outputClock = clock_new(x, (method)csound_outputClockCallback);
 		clock_fdelay(x->outputClock, x->outputClockInterval);
@@ -568,7 +567,7 @@ void *csound_new(t_symbol *s, short argc, t_atom *argv)
 		if(firstTime)
 		{
 			// Post the version number.
-			object_post(x->m_obj, "csound~ v1.1.3(vb+) Package");
+			object_post(x->m_obj, "csound~ v1.1.4(vb+) Package");
 			firstTime = false;
 		}
 	
@@ -633,16 +632,10 @@ void *csound_new(t_symbol *s, short argc, t_atom *argv)
 		((t_pxobject *)x)->z_misc = Z_NO_INPLACE;
 	
 		// Add non-signal outlets (right to left).
-        /*
 		x->done_bang_outlet = bangout(x);
 		x->compiled_bang_outlet = bangout(x);
 		x->midi_outlet = intout(x);
-		x->message_outlet = listout(x);*/
-        // vb-- no typed outlets in max-api anymore? ok, let's use outlet_new instead...
-        x->done_bang_outlet = outlet_new(x, "bang");
-        x->compiled_bang_outlet = outlet_new(x, "bang");;
-        x->midi_outlet = outlet_new(x, "int");
-        x->message_outlet = outlet_new(x, "list");
+		x->message_outlet = listout(x);
         
 		// Add signal outlets.
 		for(i=0; i<x->numOutSignals; i++) outlet_new((t_object *)x, "signal"); 
@@ -650,8 +643,8 @@ void *csound_new(t_symbol *s, short argc, t_atom *argv)
 		x->sr = sys_getsr();
 		x->cso->m_inChans = (int)x->numInSignals;
 		x->cso->m_outChans = (int)x->numOutSignals;
-		x->in = (float **) MemoryNew(sizeof(float *) * x->numInSignals);
-		x->out = (float **) MemoryNew(sizeof(float *) * x->numOutSignals);
+//		x->in = (float **) MemoryNew(sizeof(float *) * x->numInSignals);
+//		x->out = (float **) MemoryNew(sizeof(float *) * x->numOutSignals);
 	
         //x->cso->m_defaultPathID = path_getdefault();      // TODO: vb-- find alternative to path_getdefault()
         x->cso->m_defaultPathID = 0;        // vb-- on mac, shortcuts to path where the patch is in, otherwise to Applications
@@ -722,8 +715,8 @@ void csound_free(t_csound *x)
     object_free(x->msgClock);
     object_free(x->bufref);
     
-	MemoryFree(x->in);
-	MemoryFree(x->out);
+//	MemoryFree(x->in);
+//	MemoryFree(x->out);
 	delete x->cso;
     
 }

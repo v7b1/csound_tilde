@@ -50,7 +50,7 @@ public:
 	/* Try to get complete message with length <= n. 
 	   Returns length of message if available, or 0 on failure. 
 	   Locks/Unlocks m_lock. */
-	int DequeueCompleteMessage(byte* buf, int n);
+	int DequeueCompleteMessage(BBYTE* buf, int n);
 
 	inline bool Empty() const { return m_buffer.empty(); }
 
@@ -59,11 +59,11 @@ public:
        m_sysex is set to true.  If 0xf7 (end sysex data) is received, m_sysex
        is set to false. 
 	   Locks/Unlocks m_lock. */
-	void Enqueue(byte b, bool lock = true);
+	void Enqueue(BBYTE b, bool lock = true);
 
 	/* Enqueue n bytes from b into m_buffer.  b should contain only 1 complete MIDI message. 
 	   Locks/Unlocks m_lock. */
-	void EnqueueBuffer(byte* b, int n, bool lock = true);
+	void EnqueueBuffer(BBYTE* b, int n, bool lock = true);
 	
 	/* Stop active notes by enqueuing note-off's. 
 	   Locks/Unlocks m_lock. */
@@ -75,17 +75,17 @@ private:
 
 	/* Dequeue n bytes into b from mb->buffer. 
 	   Does not lock/unlock m_lock.  Does not check m_buffer's size. */
-	void DequeueBuffer(byte* b, int n); 
+	void DequeueBuffer(BBYTE* b, int n);
 
 	/* Dequeue a single byte from the buffer. 
 	   Does not lock/unlock m_lock.  Does not check m_buffer's size. */
-	byte Dequeue();
+    BBYTE Dequeue();
 
-	boost::circular_buffer<byte> m_buffer; // Contains the MIDI bytes.
+	boost::circular_buffer<BBYTE> m_buffer; // Contains the MIDI bytes.
 	bool m_sysex; // Used to filter out sysex data.
 	DEFAULT_LOCK_TYPE m_lock;  // Protects the buffer for thread safety.
     c74::max::t_object *m_obj;
-	byte m_activeNoteMatrix[16][128];
+    BBYTE m_activeNoteMatrix[16][128];
 };
 
 } // namespace dvx

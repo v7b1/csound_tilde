@@ -36,9 +36,9 @@ void to_lower(char *str);
 void to_lower(std::string & str);
 
 // Reverses size bytes in src.
-void reverseBytes(byte *b, int size);
+void reverseBytes(BBYTE *b, int size);
 
-void reverseNumber(byte *b, int size, bool reverse);
+void reverseNumber(BBYTE *b, int size, bool reverse);
 
 int nextPowOf2(int n);
 int isPowOf2(int n);

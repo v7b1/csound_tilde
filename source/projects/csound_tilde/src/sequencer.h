@@ -115,7 +115,7 @@ public:
 class MidiEvent : public Event
 {
 public:
-	MidiEvent(int time, const byte *buf, int bytes);
+	MidiEvent(int time, const BBYTE *buf, int bytes);
 	~MidiEvent() {}
 
 	int type() const { return m_type; }
@@ -125,7 +125,7 @@ public:
 	void save(ptree &pt) const;
 	#endif
 
-	byte m_buffer[MAX_MIDI_MESSAGE_SIZE];
+    BBYTE m_buffer[MAX_MIDI_MESSAGE_SIZE];
 	int m_size;
 };
 
@@ -167,7 +167,7 @@ public:
 	bool AddCsoundEvent(char *buf, bool lock); // Returns true on success.
 	bool AddControlEvent(const string &name, MYFLT value, bool lock); // Returns true on success.
 	bool AddStringEvent(const string &name, const char *str, bool lock); // Returns true on success.
-	bool AddMIDIEvent(byte *buf, int nBytes, bool lock); // Returns true on success.
+	bool AddMIDIEvent(BBYTE *buf, int nBytes, bool lock); // Returns true on success.
 	void ProcessEvents(); // Play stored events.
 
 	void AdvanceSampleCount(int n);
@@ -182,7 +182,7 @@ public:
 	inline bool Recording() { return m_recording; }
 
 	/* Careful; does not check bounds. */
-	inline void UpdateCtrlMatrix(byte chan, byte ctrl, byte val) { m_ctrlMatrix[chan][ctrl] = val; }
+	inline void UpdateCtrlMatrix(BBYTE chan, BBYTE ctrl, BBYTE val) { m_ctrlMatrix[chan][ctrl] = val; }
 
 	// Write sequence to text file in json/xml format. Does not throw std::exception's.
 	// Set current directory before calling if file is relative path.
@@ -234,8 +234,8 @@ private:
 	volatile bool m_recording;       // If == true, sequencer is in record mode. If false, sequencer is in play mode (default).
 	void *m_max_clock;		// Millisecond counter for recording events.
 
-	byte m_ctrlMatrix[16][128];
-	byte m_activeNoteMatrix[16][128];
+    BBYTE m_ctrlMatrix[16][128];
+    BBYTE m_activeNoteMatrix[16][128];
 };
 
 void Sequencer_TimerCallback(Sequencer *s);

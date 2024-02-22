@@ -45,6 +45,6 @@ inline void MemoryFree(void *ptr)
 
 // Write len bytes from src to buffer at count offset.  If needed, grow buffer and
 // update bufferSize variable.
-int BufferWrite(byte **buffer, const void *src, int len, int *count, int *bufferSize);
+int BufferWrite(BBYTE **buffer, const void *src, int len, int *count, int *bufferSize);
 
 #endif // _MEMORY_H

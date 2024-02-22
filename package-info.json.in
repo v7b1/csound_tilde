@@ -6,13 +6,9 @@
 	"name" : "csound_tilde",
 	"os" : {
 		"macintosh" : {
-			"platform" : [ "x64" ],
+			"platform" : [ "x64", "arm64" ],
 			"min_version" : "none"
 		},
-		"windows" : {
-			"platform" : [ "ia32", "x64" ],
-			"min_version" : "none"
-		}
 	},
 	"package_extra" : {
 		"reverse_domain" : "com.csound",

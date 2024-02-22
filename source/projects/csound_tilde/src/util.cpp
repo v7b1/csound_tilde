@@ -22,9 +22,11 @@
 */
 
 #include "util.h"
+#include <stdio.h>
+#include <cstring>
 
 #if defined(__MACH__)
-#include <LaunchServices.h>
+//#include <LaunchServices.h>
 #endif
 
 using namespace std;
@@ -83,7 +85,7 @@ void to_lower(std::string & str)
 }
 
 // Reverses size bytes in b.
-void reverseBytes(byte *b, int size)
+void reverseBytes(BBYTE *b, int size)
 {
 	int i, j, limit = size >> 1;
 	
@@ -98,7 +100,7 @@ void reverseBytes(byte *b, int size)
 	}
 }
 
-void reverseNumber(byte *b, int size, bool reverse)
+void reverseNumber(BBYTE *b, int size, bool reverse)
 {	
 	if(reverse && size > 1)	reverseBytes(b, size);
 }
@@ -161,22 +163,33 @@ void addQuotes(const char *src, char *dst, int capacity)
 void openFile(t_object *o, const char *path)
 {
 #ifdef MACOSX
-	char  tmpPath[MAX_STRING_LENGTH];
-	FSRef fsRef;
-	
-	snprintf(tmpPath, MAX_STRING_LENGTH-1, "file://%s", path);
-    Boolean f = false;
-	if(FSPathMakeRef((UInt8*)path, &fsRef, &f) != noErr)
-	{
-		object_error(o, "Could not convert %s to FSRef.", path);
-		return;
-	}
-	
-	if(LSOpenFSRef(&fsRef, NULL) != noErr)
-	{
-		object_error(o, "Could not open file: %s", path);
-		return;
-	}
+//	char  tmpPath[MAX_STRING_LENGTH];
+//    FSRef fsRef;
+//
+//    int noErr = 0;
+//	snprintf(tmpPath, MAX_STRING_LENGTH-1, "file://%s", path);
+//    bool f = false;
+//	if(FSPathMakeRef((uint8_t*)path, &fsRef, &f) != noErr)
+//	{
+//		object_error(o, "Could not convert %s to FSRef.", path);
+//		return;
+//	}
+//	if(LSOpenFSRef(&fsRef, NULL) != noErr)
+//	{
+//		object_error(o, "Could not open file: %s", path);
+//		return;
+//	}
+    
+    // vb: we have trouble with Apple's LaunchServices, so we need to find a way around it
+    // the following is whacky, but works for now...
+    
+    char  cmd[MAX_STRING_LENGTH];
+
+    snprintf ( cmd, MAX_STRING_LENGTH, "open '%s'", path );
+//    printf("open command: %s\n", cmd);
+
+    std::system( cmd );
+    
 #elif _WINDOWS
 	int result;
 	result = (int) ShellExecute(NULL, NULL, path, NULL, NULL, SW_SHOWNORMAL);
@@ -294,7 +307,7 @@ void PrintAtoms(t_symbol *s, long argc, t_atom *argv, char *dst, int dstSize)
     for (i = 0, ap = argv; i < argc; i++, ap++) {       // increment ap each time to get to the next atom
         switch (atom_gettype(ap)) {
             case A_LONG:
-				wrote = snprintf(b, maxLen, "%lld ", atom_getlong(ap));
+                wrote = snprintf(b, maxLen, "%ld ", atom_getlong(ap));
                 break;
             case A_FLOAT:
 				wrote = snprintf(b, maxLen, "%f ", atom_getfloat(ap));

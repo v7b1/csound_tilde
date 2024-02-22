@@ -38,14 +38,14 @@ void MidiBuffer::Clear()
 	memset(m_activeNoteMatrix, 0, MIDI_MATRIX_SIZE);
 }
 
-byte MidiBuffer::Dequeue()
+BBYTE MidiBuffer::Dequeue()
 {
-	byte b = m_buffer.front();
+    BBYTE b = m_buffer.front();
 	m_buffer.pop_front();
 	return b;
 }
 
-void MidiBuffer::DequeueBuffer(byte* b, int n)
+void MidiBuffer::DequeueBuffer(BBYTE* b, int n)
 {		
 	for(int i=0; i<n; i++)
 	{
@@ -54,9 +54,9 @@ void MidiBuffer::DequeueBuffer(byte* b, int n)
 	}
 }
 
-int MidiBuffer::DequeueCompleteMessage(byte* buf, int n)
+int MidiBuffer::DequeueCompleteMessage(BBYTE* buf, int n)
 {
-	byte b, status;
+    BBYTE b, status;
 	ScopedLock lock(m_lock);
 
 	while(!m_buffer.empty())
@@ -106,7 +106,7 @@ int MidiBuffer::DequeueCompleteMessage(byte* buf, int n)
 	return 0;
 }
 
-void MidiBuffer::Enqueue(byte b, bool lock)
+void MidiBuffer::Enqueue(BBYTE b, bool lock)
 {
 	ScopedLock k(m_lock,lock);
 	if(!m_sysex && b != 0xf0 && !m_buffer.full()) { m_buffer.push_back(b); return; }
@@ -119,9 +119,9 @@ void MidiBuffer::Enqueue(byte b, bool lock)
 		object_warn(m_obj, "MidiBuffer is Full!");
 }
 
-void MidiBuffer::EnqueueBuffer(byte* b, int n, bool lock)
+void MidiBuffer::EnqueueBuffer(BBYTE* b, int n, bool lock)
 {
-	byte status = 0;
+	BBYTE status = 0;
 		
 	status = b[0] & 0xf0;
 	switch(status)
@@ -153,13 +153,13 @@ void MidiBuffer::EnqueueBuffer(byte* b, int n, bool lock)
 
 void MidiBuffer::Flush()
 {
-	byte buf[3];
+	BBYTE buf[3];
 	buf[2] = 64;
 
 	ScopedLock lock(m_lock);
 
-	for(byte c=0; c<16; c++)
-		for(byte p=0; p<128; p++)
+	for(BBYTE c=0; c<16; c++)
+		for(BBYTE p=0; p<128; p++)
 			if(m_activeNoteMatrix[c][p])
 			{
 				buf[0] = 0x80 | c;

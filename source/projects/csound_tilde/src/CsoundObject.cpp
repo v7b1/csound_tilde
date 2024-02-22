@@ -605,7 +605,7 @@ int midiReadCallback(CSOUND *csound, void *userData, unsigned char *buf, int nby
 			if(0xB0 == (buf[bytesRead] & 0xf0))
 			{
 				// Keep track of CC values in the sequencer.
-				byte b = 0, chan, ctrl, val;
+                BBYTE b = 0, chan, ctrl, val;
 				chan = b & 0x0f;
 				ctrl = buf[bytesRead + 1];
 				val = buf[bytesRead + 2];

@@ -23,7 +23,7 @@
 
 #include "memory.h"
 
-int BufferWrite(byte **buffer, const void *src, int len, int *count, int *bufferSize)
+int BufferWrite(BBYTE **buffer, const void *src, int len, int *count, int *bufferSize)
 {
 	void *dst = NULL;
 	
@@ -31,7 +31,7 @@ int BufferWrite(byte **buffer, const void *src, int len, int *count, int *buffer
 	if(*count + len > (*bufferSize / 2)) 
 	{
 		*bufferSize *= 2;
-		*buffer = (byte*) realloc(*buffer, *bufferSize);
+		*buffer = (BBYTE*) realloc(*buffer, *bufferSize);
 		if(*buffer == NULL) 
 		{
             c74::max::object_post(NULL, "BufferWrite():  realloc() failed.");

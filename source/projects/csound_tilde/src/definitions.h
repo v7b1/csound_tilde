@@ -49,7 +49,7 @@
 		// Sequencer uses boost.serialization which requires 1-byte bool (darwin ppc arch uses 4-byte bool).
 		#define _USE_BOOST_SERIALIZATION
 	#endif
-	typedef unsigned char byte;
+	typedef unsigned char BBYTE;
 	typedef unsigned int DWORD;
 #endif
 

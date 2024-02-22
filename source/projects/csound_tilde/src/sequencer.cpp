@@ -71,7 +71,7 @@ void CsoundEvent::save(ptree &pt) const
 }
 #endif
 
-MidiEvent::MidiEvent(int time, const byte *buf, int bytes) :
+MidiEvent::MidiEvent(int time, const BBYTE *buf, int bytes) :
 	Event(EVENT_TYPE_MIDI, time), m_size(bytes)
 {
 	assert(m_size<=MAX_MIDI_MESSAGE_SIZE);
@@ -144,7 +144,7 @@ Sequencer::Sequencer(t_object *o, CSOUND *c, ChannelGroup *g, MidiBuffer *m) :
 	SetBPM(DEFAULT_BPM);
 	for(int i=0; i<16; i++)
 		for(int j=0; j<128; j++)
-			m_ctrlMatrix[i][j] = (byte) 128;
+			m_ctrlMatrix[i][j] = (BBYTE) 128;
 	memset(m_activeNoteMatrix, 0, MIDI_MATRIX_SIZE);
 }
 
@@ -252,8 +252,8 @@ void Sequencer::StartRecording()
 {
 	ChannelGroup *c = m_inChannelGroup;
 	ChannelObject *co = NULL;
-	byte ch, ctrl;
-	byte buf[3];
+    BBYTE ch, ctrl;
+    BBYTE buf[3];
 
 	if(m_read_write_thread_exists)
 	{
@@ -311,8 +311,8 @@ void Sequencer::StopRecording()
 	MidiEvent *me = NULL;
 	bool firstEventFound = false;
 	int firstEventTime = 1;
-	byte activeNoteMatrix[16][128];
-	byte status = 0, chan, pitch, vel, b[3];
+    BBYTE activeNoteMatrix[16][128];
+    BBYTE status = 0, chan, pitch, vel, b[3];
 
 	m_recording = false;
 	memset(activeNoteMatrix, 0, MIDI_MATRIX_SIZE);
@@ -372,8 +372,8 @@ void Sequencer::StopRecording()
 		{
 			if(activeNoteMatrix[i][j] > 0)
 			{
-				b[0] = (byte)i | 0x80;
-				b[1] = (byte)j;
+				b[0] = (BBYTE)i | 0x80;
+				b[1] = (BBYTE)j;
 				b[2] = 0;
 				AddMIDIEvent(b, 3, false); // Don't lock; using scoped lock above.
 			}
@@ -402,7 +402,7 @@ void Sequencer::StartPlaying()
 void Sequencer::StopPlaying()
 {
 	int i, j;
-	byte b[3];
+    BBYTE b[3];
 	ScopedLock k(m_lock);
 
 	m_cur_event = m_events.begin();
@@ -416,8 +416,8 @@ void Sequencer::StopPlaying()
 		{
 			if(m_activeNoteMatrix[i][j] > 0)
 			{
-				b[0] = (byte)i | 0x80;
-				b[1] = (byte)j;
+				b[0] = (BBYTE)i | 0x80;
+				b[1] = (BBYTE)j;
 				b[2] = 0;
 				m_midiInputBuffer->EnqueueBuffer(b, 3);
 			}
@@ -472,7 +472,7 @@ bool Sequencer::AddStringEvent(const string &name, const char *str, bool lock)
 	return true;
 }
 
-bool Sequencer::AddMIDIEvent(byte *buf, int nBytes, bool lock)
+bool Sequencer::AddMIDIEvent(BBYTE *buf, int nBytes, bool lock)
 {
 	ScopedLock k(m_lock,lock);
 
@@ -487,7 +487,7 @@ bool Sequencer::AddMIDIEvent(byte *buf, int nBytes, bool lock)
 
 void Sequencer::ProcessEvents()
 {
-	byte status, chan, pitch, vel;
+    BBYTE status, chan, pitch, vel;
 	ScopedLock k(m_lock);
 
 	if(m_cur_event == m_events.end())
@@ -663,7 +663,7 @@ void Sequencer::Read(const string & file)
 void Sequencer::ReadBinary(const string & file)
 {
 	FILE *fp = NULL;
-	byte *buffer = NULL, *bytePtr = NULL;
+    BBYTE *buffer = NULL, *bytePtr = NULL;
 	int fileSize = 0, numEvents = 0, result;
 	int i, type, time, len, data2_size, magic;
 	char buf[MAX_EVENT_MESSAGE_SIZE];
@@ -672,7 +672,7 @@ void Sequencer::ReadBinary(const string & file)
 	int magic_number = FILE_MAGIC_NUMBER;
 	int magic_number_reverse = magic_number;
 
-	reverseBytes((byte*)&magic_number_reverse, sizeof(int));
+	reverseBytes((BBYTE*)&magic_number_reverse, sizeof(int));
 
 	if(m_playing) StopPlaying();
 	if(m_recording) StopRecording();
@@ -693,7 +693,7 @@ void Sequencer::ReadBinary(const string & file)
 	fileSize = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	buffer = (byte*) MemoryNew(fileSize);
+	buffer = (BBYTE*) MemoryNew(fileSize);
 
 	if(buffer == NULL)
 	{
@@ -725,21 +725,21 @@ void Sequencer::ReadBinary(const string & file)
 	{
 		if(magic == magic_number_reverse) reverse = true;
 		numEvents = *(int*)bytePtr;
-		reverseNumber((byte*)&numEvents, sizeof(int), reverse);
+		reverseNumber((BBYTE*)&numEvents, sizeof(int), reverse);
 		bytePtr += sizeof(int);
 
 		for(i=0; i<numEvents; i++)
 		{
 			type = *(int*)bytePtr;
-			reverseNumber((byte*)&type, sizeof(int), reverse);
+			reverseNumber((BBYTE*)&type, sizeof(int), reverse);
 			bytePtr += sizeof(int);
 
 			time = *(int*)bytePtr;
-			reverseNumber((byte*)&time, sizeof(int), reverse);
+			reverseNumber((BBYTE*)&time, sizeof(int), reverse);
 			bytePtr += sizeof(int);
 
 			len = *(int*)bytePtr; // data1 size
-			reverseNumber((byte*)&len, sizeof(int), reverse);
+			reverseNumber((BBYTE*)&len, sizeof(int), reverse);
 			bytePtr += sizeof(int);
 
 			m_time = time;		// must set time before adding event
@@ -755,7 +755,7 @@ void Sequencer::ReadBinary(const string & file)
 				memcpy(buf, bytePtr, len);		// get data1
 				bytePtr += len + sizeof(int);	// skip data1 and data2 size (== sizeof(float) in this case)
 				value = *(float*)bytePtr;		// get data2
-				reverseNumber((byte*)&value, sizeof(int), reverse);
+				reverseNumber((BBYTE*)&value, sizeof(int), reverse);
 				bytePtr += sizeof(float);		// skip data2
 				AddControlEvent(buf, (double)value, false);
 				break;
@@ -770,7 +770,7 @@ void Sequencer::ReadBinary(const string & file)
 			case EVENT_TYPE_MIDI:
 				memcpy(buf, bytePtr, len);		// data1
 				bytePtr += len + sizeof(int);	// skip data1 and data2 size (== 0 in this case)
-				AddMIDIEvent((byte*) buf, len, false);
+				AddMIDIEvent((BBYTE*) buf, len, false);
 				break;
 			}
 		}
@@ -784,7 +784,7 @@ void Sequencer::ReadBinary(const string & file)
 void Sequencer::WriteBinary(const string & file)
 {
 	FILE *fp = NULL;
-	byte *buffer = NULL;
+    BBYTE *buffer = NULL;
 	int realloc_result=0, result=0, len, byteCount = 0, bufferSize = DEFAULT_SAVE_LOAD_BUFFER_SIZE;
 	int numEvents = 0;
 	float fval;
@@ -804,7 +804,7 @@ void Sequencer::WriteBinary(const string & file)
 		return;
 	}
 
-	buffer = (byte *) MemoryNew(bufferSize);
+	buffer = (BBYTE *) MemoryNew(bufferSize);
 
 	if(buffer == NULL)
 	{
