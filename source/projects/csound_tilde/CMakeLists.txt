@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-api/script/max-pretarget.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-pretarget.cmake)
 
 
 include_directories( 
@@ -146,4 +143,4 @@ endif()
 include_directories(${Boost_INCLUDE_DIRS})
 
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-api/script/max-posttarget.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-posttarget.cmake)

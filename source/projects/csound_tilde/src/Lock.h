@@ -102,7 +102,7 @@ private:
 	spinlock(const spinlock & other) {}
 	spinlock & operator=(const spinlock & other) { return *this; }
 	
-	OSSpinLock m_slock;
+    c74::max::OSSpinLock m_slock;
 };
 #endif
 

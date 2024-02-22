@@ -101,7 +101,7 @@ spinlock::~spinlock()
 
 void spinlock::lock(char *context)
 {
-	OSSpinLockLock(&m_slock);
+    c74::max::OSSpinLockLock(&m_slock);
 	#ifdef _DEBUG
 		log_lock(context);
 	#endif
@@ -112,7 +112,7 @@ void spinlock::unlock(char *context)
 	#ifdef _DEBUG
 		log_unlock(context);
 	#endif
-	OSSpinLockUnlock(&m_slock);
+    c74::max::OSSpinLockUnlock(&m_slock);
 }
 
 #endif
